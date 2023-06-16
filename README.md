@@ -12,6 +12,18 @@
 -->
 
 
+### QBT:
+For local:
+python train.py --exp_name unsupMT_enfr --data_path ./data/processed/en-fr/ --lgs en-fr --encoder_only false --emb_dim 1024 --n_layers 6 --n_heads 8 --dropout 0.1 --attention_dropout 0.1 --gelu_activation true --tokens_per_batch 2000 --batch_size 32 --bptt 256 --optimizer adam_inverse_sqrt,beta1=0.9,beta2=0.98,lr=0.0001 --epoch_size 10 --max_epoch 30000 --eval_bleu true --reload_model mass_ft_enfr_1024.pth,mass_ft_enfr_1024.pth --qbt_steps en-fr-en,fr-en-fr --encoder_bt_steps en-fr-en,fr-en-fr ...
+
+For distributed:
+export NGPU=8; CUDA_VISIBLE_DEVICES=0,1,2,3,4,5,6,7 python -m torch.distributed.launch --nproc_per_node=$NGPU train.py --exp_name unsupMT_ende --data_path ./data/processed/de-en/ --lgs en-de --encoder_only false --emb_dim 1024 --n_layers 6 --n_heads 8 --dropout 0.1 --attention_dropout 0.1 --gelu_activation true --tokens_per_batch 1000 --batch_size 16 --bptt 256 --optimizer adam_inverse_sqrt,beta1=0.9,beta2=0.98,lr=0.0001 --epoch_size 20000 --max_epoch 30000 --eval_bleu true --reload_model mass_ft_ende_1024.pth,mass_ft_ende_1024.pth --bt_steps en-de-en,de-en-de --qbt_steps en-de-en,de-en-de --encoder_bt_steps en-de-en,de-en-de --encoder_mt_random_steps en-de,de-en ...
+
+Note: Inside trainer.py, we can toggle the gradient during BT -- if we would like to update the encoder weights or not. For QBT-Staged, typically we *do not* update encoder gradients until BT.
+
+
+### Onto MASS:
+
 [MASS: Masked Sequence to Sequence Pre-training for Language Generation](https://arxiv.org/pdf/1905.02450.pdf), by Kaitao Song, [Xu Tan](https://www.microsoft.com/en-us/research/people/xuta/), [Tao Qin](https://www.microsoft.com/en-us/research/people/taoqin/), Jianfeng Lu, [Tie-Yan Liu](https://www.microsoft.com/en-us/research/people/tyliu/), is a novel pre-training method for sequence to sequence based language generation tasks. It randomly masks a sentence fragment in the encoder, and then predicts it in the decoder.
 
 ![img](figs/mass.png)
