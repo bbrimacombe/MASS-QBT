@@ -13,6 +13,14 @@
 
 
 ### QBT:
+
+For the QBT method we have updated:
+- /train.py
+- /src/trainer.py
+- /src/model/transformer.py
+- /src/data/loader.py
+- /src/evaluation/evaluator.py  
+
 For local:
 python train.py --exp_name unsupMT_enfr --data_path ./data/processed/en-fr/ --lgs en-fr --encoder_only false --emb_dim 1024 --n_layers 6 --n_heads 8 --dropout 0.1 --attention_dropout 0.1 --gelu_activation true --tokens_per_batch 2000 --batch_size 32 --bptt 256 --optimizer adam_inverse_sqrt,beta1=0.9,beta2=0.98,lr=0.0001 --epoch_size 10 --max_epoch 30000 --eval_bleu true --reload_model mass_ft_enfr_1024.pth,mass_ft_enfr_1024.pth --qbt_steps en-fr-en,fr-en-fr --encoder_bt_steps en-fr-en,fr-en-fr ...
 
