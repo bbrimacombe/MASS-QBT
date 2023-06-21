@@ -552,6 +552,11 @@ class EncDecEvaluator(Evaluator):
             logger.info("BLEU %s %s : %f" % (hyp_path, ref_path, bleu))
             scores['%s_%s-%s_mt_bleu' % (data_set, lang1, lang2)] = bleu
 
+            # evaluate BLEU score with SacreBLEU
+            sbleu = eval_sacre_bleu(ref_path, hyp_path)
+            logger.info("SacreBLEU %s %s : %f" % (hyp_path, ref_path, sbleu))
+            scores['%s_%s-%s_mt_sacre_bleu' % (data_set, lang1, lang2)] = sbleu
+
 
 
     def eval_encoder_trans(self, scores, data_set, lang1, lang2, eval_bleu):
@@ -645,6 +650,10 @@ class EncDecEvaluator(Evaluator):
             logger.info("BLEU %s %s : %f" % (hyp_path, ref_path, bleu))
             scores['%s_%s-%s_mt_encoder_bleu' % (data_set, lang1, lang2)] = bleu
 
+            # evaluate BLEU score with SacreBLEU
+            sbleu = eval_sacre_bleu(ref_path, hyp_path)
+            logger.info("SacreBLEU %s %s : %f" % (hyp_path, ref_path, sbleu))
+            scores['%s_%s-%s_mt_encoder_sacre_bleu' % (data_set, lang1, lang2)] = sbleu
 
 
 def convert_to_text(batch, lengths, dico, params):
@@ -721,3 +730,32 @@ def eval_moses_bleu(ref, hyp):
     else:
         logger.warning('Impossible to parse BLEU score! "%s"' % result)
         return -1
+
+
+def eval_sacre_bleu(ref, hyp):
+    """
+    Given a file of hypothesis and reference files,
+    evaluate the BLEU score using SacreBLEU.
+    """
+
+    assert os.path.isfile(hyp)
+    assert os.path.isfile(ref) or os.path.isfile(ref + '0')
+
+    #hyp = hyp.replace("C:\\Users\\Ben\\Desktop\\MASS-Master\\MASS-master\\MASS-unsupNMT\\", "").replace("\\", "/")
+    #ref = ref.replace("C:\\Users\\Ben\\Desktop\\MASS-Master\\MASS-master\\MASS-unsupNMT\\", "").replace("\\", "/")
+
+    hyp = hyp.replace("C:\\Users\\Ben\\Desktop\\MASS-master\\MASS-master\\MASS-unsupNMT\\", "").replace("\\", "/")
+    ref = ref.replace("C:\\Users\\Ben\\Desktop\\MASS-master\\MASS-master\\MASS-unsupNMT\\", "").replace("\\", "/")
+
+    ## https://github.com/mjpost/sacrebleu#using-your-own-reference-file
+    #command = 'sacrebleu %s -i %s -m bleu -b -w 4'
+    command = f'wsl sacrebleu %s -i %s -m bleu -b -w 4'
+
+    p = subprocess.Popen(command % (ref, hyp), stdout=subprocess.PIPE, shell=True)
+    result = p.communicate()[0].decode("utf-8")
+    if result:
+        return float(result)
+    else:
+        logger.warning('Impossible to parse BLEU score! "%s"' % result)
+        return -1
+

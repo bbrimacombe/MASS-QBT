@@ -9,6 +9,10 @@
 
 cenv/*
 
+# ignore temperary testing files
+wmt17.en-de.de
+wmt17.en-de.en
+
 
 #
 # ===========
