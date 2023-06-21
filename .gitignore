@@ -3,6 +3,16 @@
 ##
 ## Get latest from https://github.com/github/gitignore/blob/master/VisualStudio.gitignore
 
+# === Joe ===
+
+# ignore conda environment folder
+
+cenv/*
+
+
+#
+# ===========
+
 # User-specific files
 *.suo
 *.user
