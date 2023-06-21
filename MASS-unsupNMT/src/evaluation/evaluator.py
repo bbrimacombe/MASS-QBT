@@ -643,7 +643,7 @@ class EncDecEvaluator(Evaluator):
             # evaluate BLEU score
             bleu = eval_moses_bleu(ref_path, hyp_path)
             logger.info("BLEU %s %s : %f" % (hyp_path, ref_path, bleu))
-            scores['%s_%s-%s_mt_bleu' % (data_set, lang1, lang2)] = bleu
+            scores['%s_%s-%s_mt_encoder_bleu' % (data_set, lang1, lang2)] = bleu
 
 
 
