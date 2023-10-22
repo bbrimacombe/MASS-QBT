@@ -288,6 +288,7 @@ def main(params):
     set_sampling_probs(data, params)
 
     # language model training
+    # Note: This is used to "rig" the optimization to begin with a few steps of MT-Random, and then no longer use it on later epochs
     random_mono = False
     for _ in range(params.max_epoch):
 
@@ -326,10 +327,9 @@ def main(params):
                 trainer.bt_step(lang1, lang2, lang3, params.lambda_bt)
 
             ###################################
-            if trainer.n_sentences > 1000:  # Was 5000 to start this big run
+            if trainer.n_sentences > 1000:
                 random_mono = False
 
-            #print(trainer.n_sentences)
             if random_mono: # and (trainer.n_sentences % 1 == 0):
                 for lang1, lang2 in shuf_order(params.encoder_mt_random_steps):
                     trainer.encoder_mt_random(lang1, lang2, params.lambda_bt)
