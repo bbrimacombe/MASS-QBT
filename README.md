@@ -63,7 +63,14 @@ In order to fully exploit the advantages of QBT, these optimizations are used in
 ```
 --qbt_steps en-de-en,de-en-de --bt_steps en-de-en,de-en-de
 ```
-Please note that the gradients to the encoder during BT may be easily toggled inside the "bt_step"
+Please note that the gradients to the encoder during BT may be easily toggled inside the "bt_step".
+After QBT-Stages, BT gradients may be turned on again, and BT may be run for final fine-tuning.
+
+### QBT-Sync
+Seperately from QBT-Staged, QBT-Sync proposes to use the QBT methods on a fully converged UMT model. Instead of freezing the BT gradients, all gradients are allowed to flow through the encoder.
+```
+--qbt_steps en-de-en,de-en-de --bt_steps en-de-en,de-en-de --encoder_bt_steps en-de-en,de-en-de
+```
 
 #### Distributed Training
 
