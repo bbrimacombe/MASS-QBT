@@ -744,13 +744,6 @@ class Trainer(object):
         """
         Encoder back-translation
         """
-        #self.n_sentences +=  100
-        #self.stats['processed_s'] += 100
-        #self.stats['processed_w'] += 3200
-        #return 0
-
-        
-        import random
         self.cnt += 1
 
         assert lambda_coeff >= 0
@@ -768,60 +761,24 @@ class Trainer(object):
         # generate source batch
         x, lengths, positions, langs1, (_, _) = self.generate_batch(lang1=lang1, lang2=None, name='pred')
 
-        #print("--------------~~~~~~~~~~~~~~=============@ = = = = = = = = = = = \n\n"*3)
-
-        #langs1 = langs1.clone().fill_(lang2_id) #Give target lang
         langs1 = langs1.clone().fill_(lang1_id) #Give sourc lang
 
-
-        if (self.cnt % 256 == 0) or (self.cnt % 257 == 0):
-            print("=-=-=-=-=-=-=-=-=-= EBT:")
-            #print("ORIGINAL x:", x.tolist()[:3])
-            print("x: ", x[:,0])
-            #print("x_noise: ", x_noise[:,0])
-            print("langs1", langs1[0])
-            print(convert_to_text(x, lengths, self.data['dico'], params)[:5])#
-            #print([len(i) for i in x.tolist()]) ### pprints [32, 32, ,...
-            print("\n\n")
-
-        #x_noise, _ = self.add_noise(x, lengths, override=0.05)
-
-        # cuda
-        #x_noise, x, lengths, langs1 = to_cuda(x_noise, x, lengths, langs1)
         x, lengths, langs1 = to_cuda(x, lengths, langs1)
-        #enc_dict = {"x": x_noise, "lengths": lengths, "langs":langs1, "pad_len": pad_len}
         enc_dict = {"x": x, "lengths": lengths, "langs":langs1}
-        #logger.info("DICT: ", enc_dict)
 
         try:
             with torch.no_grad():
 
                 # evaluation mode
                 self.encoder.eval()
-                #
-                #sample_temperature=0.9 was working  well
-                #
+
                 x2, len2 = self.encoder.generate(src_enc=None, src_len=None, tgt_lang_id=None, enc_dict=enc_dict, sample_temperature=0.9)
-                #langs2 = x2.clone().fill_(lang1_id)
                 langs2 = x2.clone().fill_(lang2_id)
 
-                len2 = torch.Tensor([len2]*len(lengths))  # batch, len2 (255)
-                
-                if (self.cnt % 256 == 0) or (self.cnt % 257 == 0):
-                    print("x2: ", x2[:,0])
-                    x2_text = convert_to_text(x2, len2, self.data['dico'], params)
-                    print("lang2: ", langs2[0])
-                    print(x2_text[:5])
-                    #print([len(i) for i in x2.tolist()])  ### pprints [32, 32, ,...
-                    print("\n---"*4)
-
-                # free CUDA memory
-                #del enc1
+                len2 = torch.Tensor([len2]*len(lengths))
 
                 # training mode
                 self.encoder.train()
-
-            ### NEED TO ADD a token to x2??? it is missing a 
 
             # forward / loss
             len2, langs2 = to_cuda(len2, langs2)
@@ -850,7 +807,7 @@ class Trainer(object):
 
     def encoder_no_repeat_step(self, lang1, lang2):
         """
-        Encoder back-translation
+        Regularization method
         """
         self.cnt += 1
 
@@ -879,15 +836,6 @@ class Trainer(object):
             #self.stats[('En-BT-Reg-%s' % (lang1))].append(loss.item())
             #loss = lambda_coeff * loss
 
-            """
-            if self.cnt % 32 == 0:
-                print("lang1 (encoder no repeat step): ", langs1)
-                print(convert_to_text(x, lengths, self.data['dico'], params)[:3])
-                #print([len(i) for i in x2.tolist()])  ### pprints [32, 32, ,...
-                print("\n---"*4)
-            """
-
-            #NO repeating at beginnging
             tensor = self.encoder.fwd(x=x, lengths=lengths, langs=langs1, causal=False)
             scores, loss = self.encoder.predict(tensor=tensor, pred_mask=pred_mask, y=y, get_scores=True)
             #loss += (1 * torch.clamp(orig_loss, max=4))
@@ -906,10 +854,9 @@ class Trainer(object):
             print("\n\n", e, "\n\n")
 
 
-
     def encoder_mt_random(self, lang1, lang2, lambda_coeff):
         """
-        Encoder back-translation
+        Encoder random translation
         """
         if True: #try:
             assert lambda_coeff >= 0
@@ -924,12 +871,6 @@ class Trainer(object):
 
             (x1, len1), (x2, len2) = self.get_batch('pred', lang1, lang2, double_mono=True)
 
-
-            #pad_len = int(0.2 * len1.max().item() + 5)
-            #x1, len1, _ = self.encoder.pad_for_encoder_trans(x1, len1, len1, pad_len)
-            #pad_len = int(0.2 * len2.max().item() + 5)
-            #x2, len2, _ = self.encoder.pad_for_encoder_trans(x2, len2, len2, pad_len)
-
             ### Homogenize lengths and dimensions
             ###################
             x1 = x1[:min(x2.size()[0], x1.size()[0]), :min(x2.size()[1], x1.size()[1])]
@@ -941,9 +882,6 @@ class Trainer(object):
             langs2 = x2.clone().fill_(lang2_id)
             ###################
 
-            #print("HOMOGS")
-            #print("x1: ", x1)
-            #print("x2: ", x2)
 
             # target words to predict
             ###################
@@ -955,31 +893,8 @@ class Trainer(object):
             pred_mask_2 = alen[:, None] < len1[None] - 1  # do not predict anything given the last target word
             y_2 = x1.masked_select(pred_mask_2)
 
-
-            #print("y_1", y_1)
-            #print("y_2", y_2)
-
-            """
-            print("Y ORIGINAL SIZE: ", y_2.size())
-            y_2 = y_2[:x1.size()[1]]
-            y_1 = y_1[:x2.size()[1]]
-
-            print("Y AUG SIZE: ", y_2.size())
-
-            print("X ORIGINAL SIZE: ", x1.size())
-            x1 = x1[::y_2.size()[0]]
-            x2 = x2[::y_1.size()[0]]
-            print("X AUG SIZE: ", x1.size())
-            """
-            ###################
-
-
-
-
             x1, len1, langs1, x2, len2, langs2, y_1, y_2 = to_cuda(x1, len1, langs1, x2, len2, langs2, y_1, y_2)
 
-            #print(langs1)
-            #print(convert_to_text(x1, len1, self.data['dico'], params)[:5])#
 
             tensor = self.encoder('fwd', x=x1, lengths=len1, positions=None, langs=langs1, causal=False)
             _, loss_1 = self.encoder('predict', tensor=tensor, pred_mask=pred_mask_1, y=y_1, get_scores=False)
@@ -993,7 +908,6 @@ class Trainer(object):
             loss = lambda_coeff * loss * 0.01
 
             # optimize
-            ############################################self.optimize(loss)
             self.optimize(loss, 'encoder')
 
             # number of processed sentences / words
@@ -1260,23 +1174,17 @@ class EncDecTrainer(Trainer):
         enc2 = self.encoder('fwd', x=x2, lengths=len2, langs=langs2, causal=False)
         enc2 = enc2.transpose(0, 1)
 
-        if True: #0 in langs2 and (self.cnt % 5 == 0):
+        #If using gradient:
+        if True:
             self.encoder.train()
-            ##########################
-            ########################## Note: Take all this out of no_grad block to return to baseline
-            #len2 = len2.clone().fill_(len2.max())
-            #self.encoder.train()
             enc2 = self.encoder('fwd', x=x2, lengths=len2, langs=langs2, causal=False)
             enc2 = enc2.transpose(0, 1)
-            ##########################
-            ##########################
-
+        #No gradient
         else:
             with torch.no_grad():
                 #len2 = len2.clone().fill_(len2.max())
                 enc2 = self.encoder('fwd', x=x2, lengths=len2, langs=langs2, causal=False)
                 enc2 = enc2.transpose(0, 1)
-
 
         # words to predict
         alen = torch.arange(len1.max(), dtype=torch.long, device=len1.device)
@@ -1316,22 +1224,12 @@ class EncDecTrainer(Trainer):
         lang1_id = params.lang2id[lang1]
         lang2_id = params.lang2id[lang2]
 
-        #if lang1_id == 1:
-        #    return
-        ############################
-        ############################
+
         ############################
         # generate source batch
         x, lengths, positions, langs1, (_, _) = self.generate_batch(lang1=lang1, lang2=None, name='pred')
-        #langs1 = langs1.clone().fill_(lang2_id) #Give target lang
-        langs1 = langs1.clone().fill_(lang1_id) #Give sourc lang
-
-
-        #pad_len = int(2 + random.randint(1, 4))
-        #x1, lengths, langs1 = self.encoder.pad_for_encoder_trans(x1, lengths, langs1, pad_len)
-
-
-        x_noise = x
+        langs1 = langs1.clone().fill_(lang1_id)
+        x_noise = x  # From a deprecated feature; may be ignored
 
         # cuda
         x_noise, x, lengths, langs1 = to_cuda(x_noise, x, lengths, langs1)
@@ -1344,24 +1242,9 @@ class EncDecTrainer(Trainer):
                 # evaluation mode
                 self.encoder.eval()
                 x2, len2 = self.encoder.generate(src_enc=None, src_len=None, tgt_lang_id=None, enc_dict=enc_dict, sample_temperature=0.9)
-                #langs2 = x2.clone().fill_(lang1_id)
                 langs2 = x2.clone().fill_(lang2_id)
-
-
                 len2 = torch.Tensor([len2]*len(lengths))  # batch, len2 (255)
                 
-                if self.cnt % 256 == 0 or self.cnt % 255 == 0:
-                    print("o - o - o - o - o - QBT:")
-                    print("x: ", x[:,0])
-                    x1_text = convert_to_text(x, lengths, self.data['dico'], params)
-                    print(x1_text[:5])
-                    print("\n----\n")
-                    print("x2: ", x2[:,0])
-                    x2_text = convert_to_text(x2, len2, self.data['dico'], params)
-                    print("lang2: ", langs2)
-                    print(x2_text[:5])
-                    #print([len(i) for i in x2.tolist()])  ### pprints [32, 32, ,...
-                    print("\n---"*4)
 
                 # encode generate sentence
                 len2, langs2 = to_cuda(len2, langs2)
@@ -1402,10 +1285,6 @@ class EncDecTrainer(Trainer):
 
         except Exception as e:
             print(f"\n{e}\n")
-
-
-
-
 
 
     def mass_step(self, lang, lambda_coeff):
