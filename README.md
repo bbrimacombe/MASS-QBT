@@ -27,7 +27,7 @@ wget https://dl.fbaipublicfiles.com/XLM/vocab_enfr
 ./get-data-nmt.sh --src en --tgt fr --reload_codes codes_enfr --reload_vocab vocab_enfr
 ```
 ### Overview
-In order to implemented QBT into the original XLM or MASS codebases, the following files from this codebase need be changed:
+In order to implemented QBT into the original XLM or MASS codebases, these files have been updated:
 - /train.py
 - /src/trainer.py
 - /src/model/transformer.py
