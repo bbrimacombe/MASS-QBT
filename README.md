@@ -1,5 +1,7 @@
 # QBT: Quick Back-Translation for Unsupervised Machine Translation
 
+![alt text](https://github.com/bbrimacombe/Quick-Back-Translation/blob/master/figs/qbt.jpg)
+
 # Overview
 Quick back-translation makes a simple change to the Tranformer architecture during unsupervised machine translation training. The encoder, a non-autoregressive model, is repurposed as a geneative model to supplement back-translation. This enhancement requires no changes to the model architecture, and any encoder-decoder Transformer can be trained with QBT.
 
