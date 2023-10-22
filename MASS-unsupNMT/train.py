@@ -334,7 +334,8 @@ def main(params):
                 for lang1, lang2 in shuf_order(params.encoder_mt_random_steps):
                     trainer.encoder_mt_random(lang1, lang2, params.lambda_bt)
 
-            #if not random_mono:
+            #If one would like to experiment with the regularization step mentioned in the QBT manuscript,
+            #The following penalizes the encoder for sequence copying:
             #for lang1, lang2 in shuf_order(params.encoder_mt_random_steps):
             #    if (trainer.n_sentences % 55 == 0):
             #        trainer.encoder_no_repeat_step(lang1, lang2)
