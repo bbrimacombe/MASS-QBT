@@ -83,8 +83,7 @@ If you find QBT useful in your research, you may cite the paper as:
 ```
 @inproceedings{ben-2023-qbt,
     title = "Quick Back-Translation for Unsupervised Machine Translation",
-    author = "Brimacombe, Benjamin  and
-      Zhou, Jiawei"
+    author = "Brimacombe, Benjamin and Zhou, Jiawei",
     booktitle = "Findings of the Association for Computational Linguistics: EMNLP 2023",
     month = dec,
     year = "2023",
