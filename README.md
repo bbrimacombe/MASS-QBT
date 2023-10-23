@@ -80,6 +80,7 @@ Please refer to the MASS documentation for how to use distributed training in th
 
 If you find QBT useful in your research, you may cite the paper as:
 
+```
 @inproceedings{qu-etal-2022-commonsense,
     title = "Commonsense Knowledge Salience Evaluation with a Benchmark Dataset in {E}-commerce",
     author = "Qu, Yincen  and
@@ -91,6 +92,7 @@ If you find QBT useful in your research, you may cite the paper as:
     publisher = "Association for Computational Linguistics",
     abstract = "The field of unsupervised machine translation has seen significant advancement from the marriage of the Transformer and the back-translation algorithm. The Transformer is a powerful generative model, and back-translation leverages Transformer's high-quality translations for iterative self-improvement. However, the Transformer is encumbered by the run-time of autoregressive inference during back-translation, and back-translation is limited by a lack of synthetic data efficiency.",
 }
+```
     
 
 
