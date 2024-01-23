@@ -81,13 +81,18 @@ Please refer to the MASS documentation for how to use distributed training in th
 If you find QBT useful in your research, you may cite the paper as:
 
 ```
-@inproceedings{ben-2023-qbt,
+@inproceedings{brimacombe-zhou-2023-quick,
     title = "Quick Back-Translation for Unsupervised Machine Translation",
     author = "Brimacombe, Benjamin and Zhou, Jiawei",
     booktitle = "Findings of the Association for Computational Linguistics: EMNLP 2023",
     month = dec,
     year = "2023",
+    address = "Singapore",
     publisher = "Association for Computational Linguistics",
+    url = "https://aclanthology.org/2023.findings-emnlp.571",
+    doi = "10.18653/v1/2023.findings-emnlp.571",
+    pages = "8521--8534",
+    abstract = "The field of unsupervised machine translation has seen significant advancement from the marriage of the Transformer and the back-translation algorithm. The Transformer is a powerful generative model, and back-translation leverages Transformer{'}s high-quality translations for iterative self-improvement. However, the Transformer is encumbered by the run-time of autoregressive inference during back-translation, and back-translation is limited by a lack of synthetic data efficiency. We propose a two-for-one improvement to Transformer back-translation: Quick Back-Translation (QBT). QBT re-purposes the encoder as a generative model, and uses encoder-generated sequences to train the decoder in conjunction with the original autoregressive back-translation step, improving data throughput and utilization. Experiments on various WMT benchmarks demonstrate that a relatively small number of refining steps of QBT improve current unsupervised machine translation models, and that QBT dramatically outperforms standard back-translation only method in terms of training efficiency for comparable translation qualities.",
 }
 ```
     
